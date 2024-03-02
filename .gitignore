@@ -1,0 +1,12 @@
+*.so
+**/__pycache__
+.vscode*/
+build/
+.venv*/
+.eggs/
+*.egg-info/
+dist/*
+stubs/
+test-coverage/
+.env
+
