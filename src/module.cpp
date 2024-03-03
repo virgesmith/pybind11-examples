@@ -5,7 +5,7 @@
 #include "managed_resource.h"
 #include "primes.h"
 #include "constants.h"
-#include "animal.h"
+#include "shape.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -141,19 +141,20 @@ PYBIND11_MODULE(_pybind11_examples, m)
           return py::make_iterator(Constants::instance().store_begin(), Constants::instance().store_end()); 
         }, 
         py::keep_alive<0, 1>())
-      // .def("todict", [](py::object) { return Constants::instance().dict(); })
       ;
 
-    py::class_<Animal, PyAnimal>(m, "Animal")
-      .def(py::init<>())
-      .def("go", &Animal::go)
-      .def("stop", &Animal::stop)
-      .def("pop", &Animal::pop);
+    py::class_<Shape, PyShape>(m, "Shape")
+      .def(py::init<>()) // required see https://pybind11.readthedocs.io/en/stable/advanced/classes.html
+      .def("area", &Shape::area)
+      .def("perimeter", &Shape::perimeter)
+      .def("colour", &Shape::colour)
+      .def("dim", &Shape::dim);
 
-    py::class_<Dog, Animal>(m, "Dog")
-      .def(py::init<>());
+    // C++ subclass, only need top register the constructor
+    py::class_<Circle, Shape>(m, "Circle")
+      .def(py::init<double>());
 
-    m.def("call_animal", &call_animal);
+    m.def("call_shape", &call_shape);
 }
 
 
