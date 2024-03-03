@@ -107,10 +107,42 @@ PYBIND11_MODULE(_pybind11_examples, m)
       .def("nth_prime", &nth_prime_py, "n"_a)
       .def("prime_factors", &prime_factors, "n"_a);
 
-    // py::class_<Constants, std::unique_ptr<Constants>>(m)
-    //   .def(py::init([](py::object){}));
-    //   .def_static("get", [](const std::string& name) { return Constants::instance().get(name); })
-    //   .def_static("set", [](const std::string& name, py::object value) { return Constants::instance().set(name, value); });
+    // py::dynamic_attr() adds __dict__ but cant override: AttributeError: attribute '__dict__' of 'type' objects is not writable
+    py::class_<Constants, std::unique_ptr<Constants, py::nodelete>>(m, "Constants", R"""(
+      Singleton wrapper for immutable values
+    )""")
+      .def(py::init(
+        [](py::kwargs kwargs) { 
+          return std::unique_ptr<Constants, py::nodelete>(&Constants::instance(kwargs));
+        }))
+      .def("__repr__", 
+        [](py::object) { 
+          return Constants::instance().repr(); 
+        })
+      .def("__getattr__", 
+        [](py::object, const std::string& name) { 
+          return Constants::instance().get(name); 
+        })
+      .def("__setattr__", 
+        [](py::object, const std::string& name, Constants::mapped_type value) { 
+          return Constants::instance().set(name, value); 
+        })
+      .def("__delattr__", 
+        [](py::object, const std::string& name) { 
+          throw py::attribute_error("can't delete immutable: %%"s % name); 
+        })
+      .def("__iter__",
+        [](py::object) { 
+          return py::make_iterator(Constants::instance().keys_begin(), Constants::instance().keys_end()); 
+        }, 
+        py::keep_alive<0, 1>())
+      .def("items",
+        [](py::object) { 
+          return py::make_iterator(Constants::instance().store_begin(), Constants::instance().store_end()); 
+        }, 
+        py::keep_alive<0, 1>())
+      // .def("todict", [](py::object) { return Constants::instance().dict(); })
+      ;
 
     py::class_<Animal, PyAnimal>(m, "Animal")
       .def(py::init<>())

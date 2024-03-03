@@ -1,6 +1,6 @@
-# pybind11 examples
+# pybind11-examples
 
-A python module `pybind11-examples` containing a C++ extension module, containing implementations of various constructs, including:
+A python extension module written in C++ with pybind11 bindings, containing implementations of various constructs, including:
 
 - generators, including `send`, `close`, and `throw` methods
 - `__init_subclass__` - using it to register subclasses
@@ -8,6 +8,7 @@ A python module `pybind11-examples` containing a C++ extension module, containin
 - a context manager
 - some prime number stuff, for performance comparison aginst an equivalent rust implementation.
 - polymorphism across C++ and python (subclassing C++ classes in python, calling python overrides through a C++ interface)
+- dynamic immutable values wrapped in a `Constants` singleton
 
 Most of the code originated in [this](http://github.com/virgesmith/poetry-pybind11-integration) project which was originally intended to demonstate how to make pybind11 work with poetry. The project evolved and became more about:
 - how to implement certain python constructs in C++
