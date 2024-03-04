@@ -1,3 +1,4 @@
+import platform
 import pytest
 from pybind11_examples import Constants
 
@@ -12,7 +13,7 @@ def test_constants() -> None:
 
     # add a constant
     c.sqrt2 = 2 ** 0.5
-    Constants().hostname = "azxps13"
+    Constants().hostname = platform.node()
     # c["epsilon"] = 2 ** -52  # need to implement __getitem__/__setitem__
     setattr(c, "epsilon", 2 ** -52)
 
@@ -38,9 +39,12 @@ def test_constants() -> None:
 
     for key, value in c.items():
         assert key in Constants()
+        print(key, value)
         assert getattr(c, key) == value
 
     assert id(c.pi) == id(Constants().pi)
+
+    assert list(c) == list(dict(c.items()).keys())
 
 
 if __name__ == "__main__":

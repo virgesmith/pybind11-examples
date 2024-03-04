@@ -3,6 +3,7 @@
 
 #include <pybind11/pybind11.h>
 #include <string>
+#include <cmath>
 
 class Shape
 {
@@ -20,32 +21,29 @@ public:
 class PyShape : public Shape
 {
 public:
-  /* Inherit the constructors. why? */
-  using Shape::Shape;
-  // and assignment?
-  using Shape::operator=;
+  // Inherit the constructors. why, Shape is abstract? 
+  // using Shape::Shape;
 
   /* Trampolines (need one for each virtual function) */
   double area() const override {
     PYBIND11_OVERRIDE_PURE(
       double, /* Return type */
       Shape,  /* Parent class */
-      area    /* Name of function in C++ (must match Python name) */
+      area,   /* Name of function in C++ (must match Python name) */
               /*...       Argument(s) */
     );
   }
 
   double perimeter() const override {
-    PYBIND11_OVERRIDE_PURE(double, Shape, perimeter);
+    PYBIND11_OVERRIDE_PURE(double, Shape, perimeter,);
   }
 
   std::string colour() const override {
-    PYBIND11_OVERRIDE(std::string, Shape, colour);
+    PYBIND11_OVERRIDE(std::string, Shape, colour,);
   }
 };
 
-class Circle : public Shape
-{
+class Circle : public Shape {
 public:
   Circle(double r) : m_r(r) {}
 
@@ -60,6 +58,36 @@ public:
 private:
   double m_r;
 };
+
+class Triangle: public Shape {
+public:
+  Triangle(double a, double b, double c) : m_a(a), m_b(b), m_c(c) {}
+
+  double area() const override {
+    double p2 = perimeter() / 2;
+    return sqrt(p2 * (p2 - m_a) * (p2 - m_b) * (p2 - m_c));
+  }
+
+  double perimeter() const override {
+    return m_a + m_b + m_c;
+  }
+
+private:
+  double m_a;
+  double m_b;
+  double m_c;
+};
+
+class PyTriangle : public Triangle {
+public:
+  using Triangle::Triangle; // Inherit constructors
+  double area() const override { PYBIND11_OVERRIDE(double, Triangle, area,); }
+
+  double perimeter() const override { PYBIND11_OVERRIDE(double, Triangle, perimeter,); }
+
+  std::string colour() const override { PYBIND11_OVERRIDE(std::string, Triangle, colour,); }
+};
+
 
 // access the (possibly python) object from C++ via a ref to its base
 inline std::string call_shape(const Shape &shape)

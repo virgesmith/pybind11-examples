@@ -150,9 +150,13 @@ PYBIND11_MODULE(_pybind11_examples, m)
       .def("colour", &Shape::colour)
       .def("dim", &Shape::dim);
 
-    // C++ subclass, only need top register the constructor
+    // C++ subclass, only need to register the constructor
     py::class_<Circle, Shape>(m, "Circle")
       .def(py::init<double>());
+
+    py::class_<Triangle, Shape, PyTriangle>(m, "Triangle")
+      .def(py::init<double, double, double>());
+
 
     m.def("call_shape", &call_shape);
 }
