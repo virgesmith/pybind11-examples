@@ -22,12 +22,12 @@ def test_cpp_subclasses() -> None:
     assert c.colour() == "Black"
     assert c.dim() == 2
 
-    s = call_shape(c)
-    assert "Circle" in s
-    assert "2d" in s
-    assert "A=3.14159" in s
-    assert "L=6.28318" in s
-    assert "Black" in s
+    info = call_shape(c)
+    assert "Circle" in info
+    assert "2d" in info
+    assert "A=3.14159" in info
+    assert "L=6.28318" in info
+    assert "Black" in info
 
     t = Triangle(3.0, 4.0, 5.0)
     assert t.area() == 6.0
@@ -35,12 +35,12 @@ def test_cpp_subclasses() -> None:
     assert t.colour() == "Black"
     assert t.dim() == 2
 
-    s = call_shape(t)
-    assert "Triangle" in s
-    assert "2d" in s
-    assert "A=6.0" in s
-    assert "L=12.0" in s
-    assert "Black" in s
+    info = call_shape(t)
+    assert "Triangle" in info
+    assert "2d" in info
+    assert "A=6.0" in info
+    assert "L=12.0" in info
+    assert "Black" in info
 
 
 def test_py_subclasses() -> None:
