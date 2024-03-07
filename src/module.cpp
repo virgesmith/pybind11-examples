@@ -51,14 +51,30 @@ PYBIND11_MODULE(_pybind11_examples, m)
       ;
 
     py::class_<Registry>(m, "Registry", R"""(
-      C++ implementation base class that accepts __init_subclass__ calls.
+      C++ implementation of a base class that accepts __init_subclass__ calls.
+      Registry is a singleton that stores the types and params of subclasses, which can subsequently be accessed
+      by the dict-like items() method.
     )""")
       .def(py::init<>())
       // workaround the lack of @classmethod in pybind11 by wrapping in a static that returns a lambda bound to the object
       .def_property_readonly_static("__init_subclass__", [](py::object& cls) {
         return py::cpp_function([cls](const py::kwargs& kwargs) { return Registry::init_subclass(cls, kwargs); });
       })
-      .def_property_readonly_static("list", [](py::object&) { return Registry::registry; });
+      .def("__getitem__",
+        [](py::object, py::type key) -> py::dict { 
+          return (*Registry::registry)[key]; 
+        }) 
+      .def("__iter__",
+        [](py::object) { 
+          return py::make_key_iterator(Registry::registry->begin(), Registry::registry->end()); 
+        }, 
+        py::keep_alive<0, 1>())
+      .def("items",
+        [](py::object) { 
+          return py::make_iterator(Registry::registry->begin(), Registry::registry->end()); 
+        }, 
+        py::keep_alive<0, 1>())
+      ;
 
     // decorator
     m.def("exectime", &exectime, R"""(

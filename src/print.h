@@ -13,6 +13,7 @@ namespace py = pybind11;
 
 using namespace std::string_literals;
 
+
 namespace std
 {
 // forces char to be printed (rather than number)
@@ -41,17 +42,19 @@ std::string to_string(const std::map<K, V>& dict)
 {
   if (dict.empty())
     return "{}";
-  std::string result = "{";
 
-  for (const auto& [k, v]: dict)
-    result += std::to_string(k) + "=" + std::to_string(v) + " ";
+  auto it = dict.begin();
+
+  std::string result = "{" + to_string(it->first) + "=" + to_string(it->second);
+
+  for (++it; it != dict.end(); ++it)
+    result += ", " + to_string(it->first) + "=" + to_string(it->second);
   result += "}";
 
   return result;
 }
 
-}
-
+} // std
 
 // need an rvalue ref as might/will be a temporary
 template<typename T>
