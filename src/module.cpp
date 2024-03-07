@@ -53,7 +53,7 @@ PYBIND11_MODULE(_pybind11_examples, m)
     py::class_<Registry>(m, "Registry", R"""(
       C++ implementation of a base class that accepts __init_subclass__ calls.
       Registry is a singleton that stores the types and params of subclasses, which can subsequently be accessed
-      by the dict-like items() method.
+      via the [] operator, an iterator, or by the dict-like items() method.
     )""")
       .def(py::init<>())
       // workaround the lack of @classmethod in pybind11 by wrapping in a static that returns a lambda bound to the object
