@@ -6,6 +6,7 @@
 #include "primes.h"
 #include "constants.h"
 #include "shape.h"
+#include "enums.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -159,22 +160,38 @@ PYBIND11_MODULE(_pybind11_examples, m)
         py::keep_alive<0, 1>())
       ;
 
+    // cross-language polymorphism
+    // ABC
     py::class_<Shape, PyShape>(m, "Shape")
       .def(py::init<>()) // required see https://pybind11.readthedocs.io/en/stable/advanced/classes.html
-      .def("area", &Shape::area)
-      .def("perimeter", &Shape::perimeter)
-      .def("colour", &Shape::colour)
-      .def("dim", &Shape::dim);
+      .def("area", &Shape::area)  // pure virtual
+      .def("perimeter", &Shape::perimeter)  // pure virtual
+      .def("colour", &Shape::colour)  // virtual
+      .def("dim", &Shape::dim);  // nonvirtual
 
-    // C++ subclass, only need to register the constructor
+    // C++ subclasses, only need to register the constructor
     py::class_<Circle, Shape>(m, "Circle")
       .def(py::init<double>());
 
     py::class_<Triangle, Shape, PyTriangle>(m, "Triangle")
       .def(py::init<double, double, double>());
 
-
     m.def("call_shape", &call_shape);
+
+    py::enum_<CEnum>(m, "CEnum")
+      .value("ONE", CEnum::ONE)
+      .value("TWO", CEnum::TWO)
+      .export_values() // pointlessly replicates scoping issues with C enums
+    ;
+    // not scoped and comparison with int is valid - python replicates this
+    static_assert(ONE == 1);
+
+    py::enum_<CppEnum>(m, "CppEnum")
+      .value("THREE", CppEnum::THREE)
+      .value("FOUR", CppEnum::FOUR)
+    ;
+    // scoped and comparison with int is invalid - python replicates this
+    // static_assert(CppEnum::THREE == 3);
 }
 
 

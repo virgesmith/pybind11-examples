@@ -1,3 +1,5 @@
+#pragma once 
+
 #include "print.h"
 
 #include <pybind11/pybind11.h>
