@@ -64,18 +64,18 @@ PYBIND11_MODULE(_pybind11_examples, m)
         return py::cpp_function([cls](const py::kwargs& kwargs) { return Registry::init_subclass(cls, kwargs); });
       })
       .def("__getitem__",
-        [](py::object, py::type key) -> py::dict { 
-          return (*Registry::registry)[key]; 
-        }) 
+        [](py::object, py::type key) -> py::dict {
+          return (*Registry::registry)[key];
+        })
       .def("__iter__",
-        [](py::object) { 
-          return py::make_key_iterator(Registry::registry->begin(), Registry::registry->end()); 
-        }, 
+        [](py::object) {
+          return py::make_key_iterator(Registry::registry->begin(), Registry::registry->end());
+        },
         py::keep_alive<0, 1>())
       .def("items",
-        [](py::object) { 
-          return py::make_iterator(Registry::registry->begin(), Registry::registry->end()); 
-        }, 
+        [](py::object) {
+          return py::make_iterator(Registry::registry->begin(), Registry::registry->end());
+        },
         py::keep_alive<0, 1>())
       ;
 
@@ -131,34 +131,34 @@ PYBIND11_MODULE(_pybind11_examples, m)
       Singleton wrapper for immutable values
     )""")
       .def(py::init(
-        [](py::kwargs kwargs) { 
+        [](py::kwargs kwargs) {
           return std::unique_ptr<Constants, py::nodelete>(&Constants::instance(kwargs));
         }))
-      .def("__repr__", 
-        [](py::object) { 
-          return Constants::instance().repr(); 
+      .def("__repr__",
+        [](py::object) {
+          return Constants::instance().repr();
         })
-      .def("__getattr__", 
-        [](py::object, const std::string& name) { 
-          return Constants::instance().get(name); 
+      .def("__getattr__",
+        [](py::object, const std::string& name) {
+          return Constants::instance().get(name);
         })
-      .def("__setattr__", 
-        [](py::object, const std::string& name, Constants::mapped_type value) { 
-          return Constants::instance().set(name, value); 
+      .def("__setattr__",
+        [](py::object, const std::string& name, Constants::mapped_type value) {
+          return Constants::instance().set(name, value);
         })
-      .def("__delattr__", 
-        [](py::object, const std::string& name) { 
-          throw py::attribute_error("can't delete immutable: %%"s % name); 
+      .def("__delattr__",
+        [](py::object, const std::string& name) {
+          throw py::attribute_error("can't delete immutable: %%"s % name);
         })
       .def("__iter__",
-        [](py::object) { 
-          return py::make_iterator(Constants::instance().keys_begin(), Constants::instance().keys_end()); 
-        }, 
+        [](py::object) {
+          return py::make_iterator(Constants::instance().keys_begin(), Constants::instance().keys_end());
+        },
         py::keep_alive<0, 1>())
       .def("items",
-        [](py::object) { 
-          return py::make_iterator(Constants::instance().store_begin(), Constants::instance().store_end()); 
-        }, 
+        [](py::object) {
+          return py::make_iterator(Constants::instance().store_begin(), Constants::instance().store_end());
+        },
         py::keep_alive<0, 1>())
       ;
 
@@ -195,8 +195,7 @@ PYBIND11_MODULE(_pybind11_examples, m)
     // scoped and comparison with int is invalid - python replicates this
     // static_assert(CppEnum::THREE == 3);
 
-    // auto-vectorised function
-    m.def("daxpy", py::vectorize(daxpy));
+    // auto-vectorised function. As the vectorised version is much slower when called with scalar arguments an overload is provided for this case
+    m.def("daxpy", py::overload_cast<double, double, double>(daxpy), "Perform a scalar double precision a-x-plus-y operation", "a"_a, "x"_a, "y"_a)
+     .def("daxpy", py::vectorize(daxpy), "Perform a vectorised double precision a-x-plus-y operation", "a"_a, "x"_a, "y"_a);
 }
-
-
