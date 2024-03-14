@@ -173,10 +173,10 @@ PYBIND11_MODULE(_pybind11_examples, m)
 
     // C++ subclasses, only need to register the constructor
     py::class_<Circle, Shape>(m, "Circle")
-      .def(py::init<double>());
+      .def(py::init<double>(), "radius"_a);
 
     py::class_<Triangle, Shape, PyTriangle>(m, "Triangle")
-      .def(py::init<double, double, double>());
+      .def(py::init<double, double, double>(), "Scalene triangle specified by the lengths of each side.");
 
     m.def("call_shape", &call_shape);
 

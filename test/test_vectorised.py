@@ -1,4 +1,3 @@
-from time import time
 import numpy as np
 import pytest
 from pybind11_examples import daxpy, average_exectime
