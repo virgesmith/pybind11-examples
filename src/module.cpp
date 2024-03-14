@@ -7,9 +7,11 @@
 #include "constants.h"
 #include "shape.h"
 #include "enums.h"
+#include "vectorised.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/numpy.h>
 
 namespace py = pybind11;
 
@@ -192,6 +194,9 @@ PYBIND11_MODULE(_pybind11_examples, m)
     ;
     // scoped and comparison with int is invalid - python replicates this
     // static_assert(CppEnum::THREE == 3);
+
+    // auto-vectorised function
+    m.def("daxpy", py::vectorize(daxpy));
 }
 
 

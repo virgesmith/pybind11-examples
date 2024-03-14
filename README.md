@@ -10,12 +10,12 @@ A python extension module written in C++ with pybind11 bindings, containing impl
 - [X] polymorphism across C++ and python (subclassing C++ classes in python, calling python overrides through a C++ interface)
 - [X] dynamic immutable values wrapped in a `Constants` singleton
 - [X] C and C++ enumerations
-- [ ] vectorised functions
+- [X] vectorised functions with a performance comparison
 - [ ] type annotations for C++ implementations 
 
 Most of the code originated in [this](http://github.com/virgesmith/poetry-pybind11-integration) project which was originally intended to demonstate how to make pybind11 work with poetry. The project evolved and became more about:
 - how to implement certain python constructs in C++
-- performance comparison between python modules implemented in [rust](https://github.com/virgesmith/poetry-rust-integration/) and C++
+- performance comparison between python modules implemented in python, [rust](https://github.com/virgesmith/poetry-rust-integration/) and C++
 
 # usage
 
@@ -29,6 +29,12 @@ Test:
 
 ```sh
 pytest
+```
+
+Performance (vectorisation comparison):
+
+```sh
+python test/test_vectorised.py
 ```
 
 Use, e.g.:
@@ -49,5 +55,3 @@ Type stubs are generated based on the signatures and docstrings in [module.cpp](
 ```
 pybind11-stubgen _pybind11_examples
 ```
-
-NB some manual corrections to the generated `__init__.pyi` are required.
