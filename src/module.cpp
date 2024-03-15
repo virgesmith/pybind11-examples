@@ -80,11 +80,12 @@ PYBIND11_MODULE(_pybind11_examples, m)
       ;
 
     // decorator
-    m.def("exectime", &exectime, R"""(
+    m.def("exectime", &exectime, "function"_a, R"""(
       A simple decorator that times execution, implemented in C++
       )""")
-      .def("average_exectime", &average_exectime, py::kw_only(), py::arg("n"), R"""(
-      A parameterised decorator that averages execution time for a given number of repeats, implemented in C++
+      .def("average_exectime", &average_exectime, py::kw_only(), "n"_a, R"""(
+      A parameterised decorator that averages execution time for a given number of repeats, implemented in C++. 
+      It returns a tuple containing the average exec time (in ms) and the function result
       )""");
 
     //
@@ -164,7 +165,9 @@ PYBIND11_MODULE(_pybind11_examples, m)
 
     // cross-language polymorphism
     // ABC
-    py::class_<Shape, PyShape>(m, "Shape")
+    py::class_<Shape, PyShape>(m, "Shape", R"""(
+      Abstract base class for shapes. Defines two pure virtual functions, one virtual and one nonvirtual.
+    )""")
       .def(py::init<>()) // required see https://pybind11.readthedocs.io/en/stable/advanced/classes.html
       .def("area", &Shape::area)  // pure virtual
       .def("perimeter", &Shape::perimeter)  // pure virtual

@@ -251,6 +251,11 @@ class Registry:
     def items(self) -> typing.Iterator:
         ...
 class Shape:
+    """
+    
+          Abstract base class for shapes. Defines two pure virtual functions, one virtual and one nonvirtual.
+        
+    """
     def __init__(self) -> None:
         ...
     def area(self) -> float:
@@ -266,9 +271,10 @@ class Triangle(Shape):
         """
         Scalene triangle specified by the lengths of each side.
         """
-def average_exectime(*, n: int) -> cpp_function:
+def average_exectime(*, n: int) -> typing.Callable[[typing.Any], tuple[float, typing.Any]]:
     """
-          A parameterised decorator that averages execution time for a given number of repeats, implemented in C++
+          A parameterised decorator that averages execution time for a given number of repeats, implemented in C++. 
+          It returns a tuple containing the average exec time (in ms) and the function result
     """
 def call_shape(arg0: Shape) -> str:
     ...
@@ -282,7 +288,7 @@ def daxpy(a: numpy.ndarray[numpy.float64], x: numpy.ndarray[numpy.float64], y: n
     """
     Perform a vectorised double precision a-x-plus-y operation
     """
-def exectime(arg0: typing.Callable) -> cpp_function:
+def exectime(arg0: typing.Callable) -> typing.Callable[[typing.Any], typing.Any]:
     """
           A simple decorator that times execution, implemented in C++
     """
