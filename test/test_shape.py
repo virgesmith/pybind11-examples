@@ -10,8 +10,8 @@ def test_abstract_base() -> None:
     with pytest.raises(RuntimeError):
         a.area()
     # ...though others won't
-    a.colour() # virtual
-    a.dim() # nonvirtual
+    a.colour()  # virtual
+    a.dim()  # nonvirtual
 
 
 def test_cpp_subclasses() -> None:
@@ -57,21 +57,21 @@ def test_py_subclasses() -> None:
         # override the (virtual) default implementation
         def perimeter(self) -> float:
             return (self.length + self.width) * 2
-        
+
         def colour(self) -> str:
             return "Green"
 
         # override the nonvirtual method (this will only affect direct calls from python)
         def dim(self) -> str:
             raise TypeError("nonvirtual impl not visible via Shape ref")
-        
+
     class Square(Rectangle):
         def __init__(self, length: float) -> None:
             Rectangle.__init__(self, length, length)
 
         def colour(self) -> str:
             return "White"
-        
+
     class EquilateralTriangle(Triangle):
         def __init__(self, length: float) -> None:
             Triangle.__init__(self, length, length, length)
@@ -84,19 +84,18 @@ def test_py_subclasses() -> None:
     assert r.area() == 12.0
     assert r.perimeter() == 14.0
     with pytest.raises(TypeError):
-        r.dim() # nonvirtual override is called
+        r.dim()  # nonvirtual override is called
 
     s = Square(0.5)
     assert s.area() == 0.25
     assert s.perimeter() == 2.0
     with pytest.raises(TypeError):
-        s.dim() # nonvirtual override (in Rectangle) is called
-
+        s.dim()  # nonvirtual override (in Rectangle) is called
 
     # access via Base ref
     info = call_shape(r)
     assert "Rectangle" in info
-    assert "2d" in info # nonvirtual override not called
+    assert "2d" in info  # nonvirtual override not called
     assert "A=12.0" in info
     assert "L=14.0" in info
     assert "Green" in info
@@ -104,7 +103,7 @@ def test_py_subclasses() -> None:
     # access via Base ref
     info = call_shape(s)
     assert "Square" in info
-    assert "2d" in info # nonvirtual override not called
+    assert "2d" in info  # nonvirtual override not called
     assert "A=0.25" in info
     assert "L=2.0" in info
     assert "White" in info
@@ -119,7 +118,10 @@ def test_py_subclasses() -> None:
     assert "2d" in info
     assert "A=0.433" in info
     assert "L=3.0" in info
-    assert "Red" in info # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#combining-virtual-functions-and-inheritance
+    assert (
+        "Red" in info
+    )  # https://pybind11.readthedocs.io/en/stable/advanced/classes.html#combining-virtual-functions-and-inheritance
+
 
 if __name__ == "__main__":
     test_abstract_base()

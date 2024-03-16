@@ -1,7 +1,7 @@
-
 from enum import Enum
 import pybind11_examples as outerscope
 from pybind11_examples import CEnum, CppEnum
+
 
 class PyEnum(Enum):
     SEVEN = 7
@@ -25,10 +25,11 @@ def test_enum():
     # assert issubclass(X, int)
 
     Pybind11Enum = [CEnum, CppEnum]
+
     # name comparison (note 3.12 syntax)
-    # also pybind11 enums don't subclass enum and 
+    # also pybind11 enums don't subclass enum and
     # pybind11_builtins.pybind11_object is seemingly inaccessible
-    def n[T: Enum | Pybind11Enum](e: T , name: str) -> bool:
+    def n[T: Enum | Pybind11Enum](e: T, name: str) -> bool:
         return e.name == name
 
     assert n(CEnum.ONE, "ONE")
@@ -42,5 +43,3 @@ def test_enum_scope() -> None:
     assert hasattr(outerscope, "TWO")
     assert not hasattr(outerscope, "THREE")
     assert not hasattr(outerscope, "FIVE")
-
-

@@ -18,7 +18,6 @@ def test_registry() -> None:
     class Test3(PyBase, Registry, id=13, other="string"):
         pass
 
-
     assert Test0 in Registry()
     assert Registry()[Test0] == {}
     assert Registry()[Test1]["id"] == 5

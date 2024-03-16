@@ -3,7 +3,15 @@ from operator import mul
 import random
 import pytest
 
-from pybind11_examples import is_prime, nth_prime, prime_factors, PrimeSieve, PrimeRange, PrimeGenerator
+from pybind11_examples import (
+    is_prime,
+    nth_prime,
+    prime_factors,
+    PrimeSieve,
+    PrimeRange,
+    PrimeGenerator,
+)
+
 
 def primes(gen):
     yield 2
@@ -11,9 +19,36 @@ def primes(gen):
     p = gen()
     yield from p
 
+
 def test_sieve():
     p = list(PrimeSieve(100))
-    assert p == [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+    assert p == [
+        2,
+        3,
+        5,
+        7,
+        11,
+        13,
+        17,
+        19,
+        23,
+        29,
+        31,
+        37,
+        41,
+        43,
+        47,
+        53,
+        59,
+        61,
+        67,
+        71,
+        73,
+        79,
+        83,
+        89,
+        97,
+    ]
     *_, p = list(PrimeSieve(100_001_000))
     assert p == 100_000_969
 
@@ -47,8 +82,8 @@ def test_is_prime():
     assert is_prime(7919)
     assert is_prime(104729)
     assert is_prime(1299709)
-    assert not is_prime(2 ** 30 - 1)
-    assert is_prime(2 ** 31 - 1)
+    assert not is_prime(2**30 - 1)
+    assert is_prime(2**31 - 1)
 
     p = list(PrimeRange(3, 1000))
     for n in range(3, 1000):
@@ -70,10 +105,10 @@ def test_prime_factors():
     assert prime_factors(6) == [2, 3]
 
     random.seed(19937)
-    numbers = random.choices(range(1000000), k = 100)
+    numbers = random.choices(range(1000000), k=100)
     for n in numbers:
         assert reduce(mul, prime_factors(n)) == n
 
-    numbers = random.choices(range(100000000, 101000000), k = 10)
+    numbers = random.choices(range(100000000, 101000000), k=10)
     for n in numbers:
         assert reduce(mul, prime_factors(n)) == n

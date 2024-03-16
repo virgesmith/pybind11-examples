@@ -2,6 +2,7 @@ import platform
 import pytest
 from pybind11_examples import Constants
 
+
 def test_constants() -> None:
 
     e = 2.71828
@@ -12,10 +13,10 @@ def test_constants() -> None:
         Constants(pi=3.14159)
 
     # add a constant
-    c.sqrt2 = 2 ** 0.5
+    c.sqrt2 = 2**0.5
     Constants().hostname = platform.node()
     # c["epsilon"] = 2 ** -52  # need to implement __getitem__/__setitem__
-    setattr(c, "epsilon", 2 ** -52)
+    setattr(c, "epsilon", 2**-52)
 
     # check cant modify
     with pytest.raises(ValueError):

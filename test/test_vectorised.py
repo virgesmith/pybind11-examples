@@ -16,12 +16,13 @@ def test_vectorised() -> None:
     x = np.array(x)
     y = np.array(y)
 
-    y.resize((10,2))
+    y.resize((10, 2))
     with pytest.raises(RuntimeError):
         _ = daxpy(a, x, y)
     # numpy also fails
     with pytest.raises(ValueError):
         _ = a * x + y
+
 
 def compare_vectorised_performance() -> None:
     SIZE = 10_000_000
@@ -31,11 +32,11 @@ def compare_vectorised_performance() -> None:
     y = rng.uniform(size=SIZE)
     z = np.empty(SIZE)
 
-
     # unvectorised python loop
     @average_exectime(n=3)
     def u_py_loop() -> None:
-        for i in range(SIZE): z[i] = a * x[i] + y[i]
+        for i in range(SIZE):
+            z[i] = a * x[i] + y[i]
 
     elapsed_ms, _ = u_py_loop()
     print(f"unvectorised python loop: {elapsed_ms:.2f}ms")
@@ -44,6 +45,7 @@ def compare_vectorised_performance() -> None:
     @average_exectime(n=3)
     def u_py_lcomp() -> None:
         _ = [a * x[i] + y[i] for i in range(SIZE)]
+
     elapsed_ms, _ = u_py_lcomp()
     print(f"unvectorised python listcomp: {elapsed_ms:.2f}ms")
 
@@ -52,6 +54,7 @@ def compare_vectorised_performance() -> None:
     def u_pybind() -> None:
         for i in range(SIZE):
             z[i] = daxpy(a, x[i], y[i])
+
     elapsed_ms, _ = u_pybind()
     print(f"unvectorised pybind11: {elapsed_ms:.2f}ms")
 
@@ -59,6 +62,7 @@ def compare_vectorised_performance() -> None:
     @average_exectime(n=3)
     def v_numpy() -> None:
         z = a * x + y
+
     elapsed_ms, _ = v_numpy()
     print(f"vectorised numpy: {elapsed_ms:.2f}ms")
 
@@ -66,9 +70,9 @@ def compare_vectorised_performance() -> None:
     @average_exectime(n=3)
     def v_pybind() -> None:
         z = daxpy(a, x, y)
+
     elapsed_ms, _ = v_pybind()
     print(f"vectorised pybind11: {elapsed_ms:.2f}ms")
-
 
 
 if __name__ == "__main__":

@@ -88,10 +88,16 @@ PYBIND11_MODULE(_pybind11_examples, m)
       It returns a tuple containing the average exec time (in ms) and the function result
       )""");
 
-    //
     py::class_<ManagedResource<Thing, int, int>>(m, "ManagedThing")
-      .def(py::init<int, int>(), "param1"_a, "param2"_a)
-      .def("__call__", [](const ManagedResource<Thing, int, int>& wrapper) { return wrapper().do_the_thing(); }, R"""(
+      .def(py::init([](int a, int b) { 
+          return std::move(ManagedResource<Thing, int, int>(&Thing::do_the_thing, a, b));
+        }), 
+        "param1"_a, "param2"_a, 
+        R"""(
+        Initialise the wrapper, with the parameters and method to be called on the wrapped object.
+        The wrapped object is NOT constructed until __enter__ is called.
+        )""")
+      .def("__call__", [](const ManagedResource<Thing, int, int>& wrapper) { return wrapper(); }, R"""(
         Here you require at least one lambda to access the wrapped object and perform some operation on/with it.
         The object itself cannot be exposed to python as this will break RAII (you could bind the result of this call to a python variable
         and attempt access outside the context manager, invoking undefined behaviour - the memory will have been released).
