@@ -1,6 +1,6 @@
 import platform
 import pytest
-from pybind11_examples import Constants
+from pybind11_examples import Constants, test
 
 
 def test_constants() -> None:
@@ -40,13 +40,32 @@ def test_constants() -> None:
 
     for key, value in c.items():
         assert key in Constants()
-        print(key, value)
         assert getattr(c, key) == value
 
+    # check singleton
     assert id(c.pi) == id(Constants().pi)
+
+    # check can re-construct with new constants
+    c = Constants(isquared=-1)
+
+    # check can't re-construct with existing constants
+    with pytest.raises(ValueError):
+        c = Constants(isquared=-1)
 
     assert list(c) == list(dict(c.items()).keys())
 
+    # check can add new constant in C++...
+    assert "cpp_version" not in c
+    test.add_constant("cpp_version", 20)
+    assert c.cpp_version == 20
+    # ...and not modify it 
+    with pytest.raises(ValueError):
+        test.add_constant("cpp_version", 11)
+
+    # note that c *can* be reassigned
+    c = 0
+    assert c == 0
 
 if __name__ == "__main__":
     test_constants()
+    print(Constants())

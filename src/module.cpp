@@ -137,10 +137,15 @@ PYBIND11_MODULE(_pybind11_examples, m)
     py::class_<Constants, std::unique_ptr<Constants, py::nodelete>>(m, "Constants", R"""(
       Singleton wrapper for immutable values
     )""")
-      .def(py::init(
-        [](py::kwargs kwargs) {
-          return std::unique_ptr<Constants, py::nodelete>(&Constants::instance(kwargs));
-        }))
+      // Not sure which __init__ approach (if any) is best... in either cast unique_ptr is required because dtor is private
+      // .def(py::init(
+      //   [](py::kwargs kwargs) {
+      //     return std::unique_ptr<Constants, py::nodelete>(&Constants::instance(kwargs));
+      //   }))
+      .def("__init__", 
+        [](py::object, py::kwargs kwargs) { 
+          Constants::instance(kwargs); 
+        })
       .def("__repr__",
         [](py::object) {
           return Constants::instance().repr();
@@ -207,4 +212,10 @@ PYBIND11_MODULE(_pybind11_examples, m)
     // auto-vectorised function. As the vectorised version is much slower when called with scalar arguments an overload is provided for this case
     m.def("daxpy", py::overload_cast<double, double, double>(daxpy), "Perform a scalar double precision a-x-plus-y operation", "a"_a, "x"_a, "y"_a)
      .def("daxpy", py::vectorize(daxpy), "Perform a vectorised double precision a-x-plus-y operation", "a"_a, "x"_a, "y"_a);
+
+    m.def_submodule("test", "submodule for tests that need to be run in C++")
+      .def("add_constant", [](py::str key, py::object value) { Constants::instance().set(key, value); });
+
+    // problem: nothing to stop this being reassigned
+    // m.attr("const") = std::unique_ptr<Constants, py::nodelete>(&Constants::instance());
 }
