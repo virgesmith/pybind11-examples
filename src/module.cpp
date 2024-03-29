@@ -17,32 +17,30 @@ namespace py = pybind11;
 
 using namespace py::literals;
 
-
 PYBIND11_MODULE(_pybind11_examples, m)
 {
-    m.doc() = R"""(
-      Pybind11 example plugin
-      -----------------------
-      .. currentmodule:: _pybind11_examples
-      .. autosummary::
-          :toctree: _generate
-    )""";
+  m.doc() = R"""(
+    Pybind11 example plugin
+    -----------------------
+    .. currentmodule:: _pybind11_examples
+    .. autosummary::
+        :toctree: _generate
+  )""";
 
-    m.def("fib_recursive", &fib_recursive, "n"_a, R"""(
-      Return nth value in fibonnacci sequence, computed recursively.
-      )""");
+  m.def("fib_recursive", &fib_recursive, "n"_a, R"""(
+    Return nth value in fibonnacci sequence, computed recursively.
+    )""");
 
-    py::class_<FibGenerator>(m, "FibGenerator", R"""(
-      C++ implementation of a Fibonacci sequence generator.
-    )""")
+  py::class_<FibGenerator>(m, "FibGenerator", R"""(
+    C++ implementation of a Fibonacci sequence generator.
+  )""")
       .def(py::init<>())
       .def("__iter__", &FibGenerator::iter, "__iter__ dunder")
-      .def("__next__", &FibGenerator::next, "__next__ dunder")
-      ;
+      .def("__next__", &FibGenerator::next, "__next__ dunder");
 
-    py::class_<Collatz>(m, "Collatz", R"""(
-      C++ implementation of a Collatz sequence generator.
-      )""")
+  py::class_<Collatz>(m, "Collatz", R"""(
+    C++ implementation of a Collatz sequence generator.
+    )""")
       .def(py::init<uint64_t>(), "n"_a)
       .def("__iter__", &Collatz::iter, "return iter")
       .def("__next__", &Collatz::next, "return next item")
@@ -50,37 +48,40 @@ PYBIND11_MODULE(_pybind11_examples, m)
       .def("send", py::overload_cast<>(&Collatz::next), "generator send (equivalent to next()")
       .def("close", &Collatz::close, "generator close")
       .def("throw", &Collatz::throw_, "type"_a, "value"_a = py::str(), "traceback"_a = py::none(), "generator throw")
-      .def("throw", py::overload_cast<>(&Collatz::throw_default), "generator throw default")
-      ;
+      .def("throw", py::overload_cast<>(&Collatz::throw_default), "generator throw default");
 
-    py::class_<Registry>(m, "Registry", R"""(
-      C++ implementation of a base class that accepts __init_subclass__ calls.
-      Registry is a singleton that stores the types and params of subclasses, which can subsequently be accessed
-      via the [] operator, an iterator, or by the dict-like items() method.
-    )""")
+  py::class_<Registry>(m, "Registry", R"""(
+    C++ implementation of a base class that accepts __init_subclass__ calls.
+    Registry is a singleton that stores the types and params of subclasses, which can subsequently be accessed
+    via the [] operator, an iterator, or by the dict-like items() method.
+  )""")
       .def(py::init<>())
       // workaround the lack of @classmethod in pybind11 by wrapping in a static that returns a lambda bound to the object
-      .def_property_readonly_static("__init_subclass__", [](py::object& cls) {
-        return py::cpp_function([cls](const py::kwargs& kwargs) { return Registry::init_subclass(cls, kwargs); });
-      })
+      .def_property_readonly_static("__init_subclass__", [](py::object &cls)
+                                    { return py::cpp_function([cls](const py::kwargs &kwargs)
+                                                              { return Registry::init_subclass(cls, kwargs); }); })
       .def("__getitem__",
-        [](py::object, py::type key) -> py::dict {
-          return (*Registry::registry)[key];
-        })
-      .def("__iter__",
-        [](py::object) {
-          return py::make_key_iterator(Registry::registry->begin(), Registry::registry->end());
-        },
-        py::keep_alive<0, 1>())
-      .def("items",
-        [](py::object) {
-          return py::make_iterator(Registry::registry->begin(), Registry::registry->end());
-        },
-        py::keep_alive<0, 1>())
-      ;
+           [](py::object, py::type key) -> py::dict
+           {
+             return (*Registry::registry)[key];
+           })
+      .def(
+          "__iter__",
+          [](py::object)
+          {
+            return py::make_key_iterator(Registry::registry->begin(), Registry::registry->end());
+          },
+          py::keep_alive<0, 1>())
+      .def(
+          "items",
+          [](py::object)
+          {
+            return py::make_iterator(Registry::registry->begin(), Registry::registry->end());
+          },
+          py::keep_alive<0, 1>());
 
-    // decorator
-    m.def("exectime", &exectime, "function"_a, R"""(
+  // decorator
+  m.def("exectime", &exectime, "function"_a, R"""(
       A simple decorator that times execution, implemented in C++
       )""")
       .def("average_exectime", &average_exectime, py::kw_only(), "n"_a, R"""(
@@ -88,16 +89,18 @@ PYBIND11_MODULE(_pybind11_examples, m)
       It returns a tuple containing the average exec time (in ms) and the function result
       )""");
 
-    py::class_<ManagedResource<Thing, int, int>>(m, "ManagedThing")
-      .def(py::init([](int a, int b) { 
-          return std::move(ManagedResource<Thing, int, int>(&Thing::do_the_thing, a, b));
-        }), 
-        "param1"_a, "param2"_a, 
-        R"""(
+  py::class_<ManagedResource<Thing, int, int>>(m, "ManagedThing")
+      .def(py::init([](int a, int b)
+                    { return std::move(ManagedResource<Thing, int, int>(&Thing::do_the_thing, a, b)); }),
+           "param1"_a, "param2"_a,
+           R"""(
         Initialise the wrapper, with the parameters and method to be called on the wrapped object.
         The wrapped object is NOT constructed until __enter__ is called.
         )""")
-      .def("__call__", [](const ManagedResource<Thing, int, int>& wrapper) { return wrapper(); }, R"""(
+      .def(
+          "__call__", [](const ManagedResource<Thing, int, int> &wrapper)
+          { return wrapper(); },
+          R"""(
         Here you require at least one lambda to access the wrapped object and perform some operation on/with it.
         The object itself cannot be exposed to python as this will break RAII (you could bind the result of this call to a python variable
         and attempt access outside the context manager, invoking undefined behaviour - the memory will have been released).
@@ -105,117 +108,117 @@ PYBIND11_MODULE(_pybind11_examples, m)
       .def("__enter__", &ManagedResource<Thing, int, int>::enter, "Enter context manager.")
       .def("__exit__", &ManagedResource<Thing, int, int>::exit, "type"_a, "value"_a = py::str(), "traceback"_a = py::none(), "Exit context manager.");
 
-    py::class_<PrimeSieve>(m, "PrimeSieve", R"""(
+  py::class_<PrimeSieve>(m, "PrimeSieve", R"""(
       C++ implementation of a prime number sieve.
       )""")
       .def(py::init<size_t>(), "n"_a)
       .def("__iter__", &PrimeSieve::iter, "__iter__ dunder")
-      .def("__next__", &PrimeSieve::next, "__next__ dunder")
-      ;
+      .def("__next__", &PrimeSieve::next, "__next__ dunder");
 
-    py::class_<PrimeGenerator>(m, "PrimeGenerator", R"""(
+  py::class_<PrimeGenerator>(m, "PrimeGenerator", R"""(
       C++ implementation of a prime number generator.
       )""")
       .def(py::init<>())
       .def("__iter__", &PrimeGenerator::iter, "__iter__ dunder")
-      .def("__next__", &PrimeGenerator::next, "__next__ dunder")
-      ;
+      .def("__next__", &PrimeGenerator::next, "__next__ dunder");
 
-    py::class_<PrimeRange>(m, "PrimeRange", R"""(
+  py::class_<PrimeRange>(m, "PrimeRange", R"""(
       C++ implementation of a prime number generator.
       )""")
       .def(py::init<size_t, size_t>(), "start"_a, "length"_a)
       .def("__iter__", &PrimeRange::iter, "__iter__ dunder")
-      .def("__next__", &PrimeRange::next, "__next__ dunder")
-      ;
+      .def("__next__", &PrimeRange::next, "__next__ dunder");
 
-    m.def("is_prime", &is_prime_py, "n"_a)
+  m.def("is_prime", &is_prime_py, "n"_a)
       .def("nth_prime", &nth_prime_py, "n"_a)
       .def("prime_factors", &prime_factors, "n"_a);
 
-    // py::dynamic_attr() adds __dict__ but cant override: AttributeError: attribute '__dict__' of 'type' objects is not writable
-    py::class_<Constants, std::unique_ptr<Constants, py::nodelete>>(m, "Constants", R"""(
+  // py::dynamic_attr() adds __dict__ but cant override: AttributeError: attribute '__dict__' of 'type' objects is not writable
+  py::class_<Constants, std::unique_ptr<Constants, py::nodelete>>(m, "Constants", R"""(
       Singleton wrapper for immutable values
     )""")
-      // Not sure which __init__ approach (if any) is best... in either cast unique_ptr is required because dtor is private
-      // .def(py::init(
-      //   [](py::kwargs kwargs) {
-      //     return std::unique_ptr<Constants, py::nodelete>(&Constants::instance(kwargs));
-      //   }))
-      .def("__init__", 
-        [](py::object, py::kwargs kwargs) { 
-          Constants::instance(kwargs); 
-        })
+      .def_static(
+          "add",
+          [](py::kwargs kwargs)
+          {
+            Constants::instance(kwargs);
+          },
+          "add constants (throws if already defined)")
       .def("__repr__",
-        [](py::object) {
-          return Constants::instance().repr();
-        })
+           [](py::object)
+           {
+             return Constants::instance().repr();
+           })
       .def("__getattr__",
-        [](py::object, const std::string& name) {
-          return Constants::instance().get(name);
-        })
+           [](py::object, const std::string &name)
+           {
+             return Constants::instance().get(name);
+           })
       .def("__setattr__",
-        [](py::object, const std::string& name, Constants::mapped_type value) {
-          return Constants::instance().set(name, value);
-        })
+           [](py::object, const std::string &name, Constants::mapped_type value)
+           {
+             return Constants::instance().set(name, value);
+           })
       .def("__delattr__",
-        [](py::object, const std::string& name) {
-          throw py::attribute_error("can't delete immutable: %%"s % name);
-        })
-      .def("__iter__",
-        [](py::object) {
-          return py::make_iterator(Constants::instance().keys_begin(), Constants::instance().keys_end());
-        },
-        py::keep_alive<0, 1>())
-      .def("items",
-        [](py::object) {
-          return py::make_iterator(Constants::instance().store_begin(), Constants::instance().store_end());
-        },
-        py::keep_alive<0, 1>())
-      ;
+           [](py::object, const std::string &name)
+           {
+             throw py::attribute_error("can't delete immutable: %%"s % name);
+           })
+      .def(
+          "__iter__",
+          [](py::object)
+          {
+            return py::make_iterator(Constants::instance().keys_begin(), Constants::instance().keys_end());
+          },
+          py::keep_alive<0, 1>())
+      .def(
+          "items",
+          [](py::object)
+          {
+            return py::make_iterator(Constants::instance().store_begin(), Constants::instance().store_end());
+          },
+          py::keep_alive<0, 1>());
+  m.attr("CONST") = std::unique_ptr<Constants, py::nodelete>(&Constants::instance());
 
-    // cross-language polymorphism
-    // ABC
-    py::class_<Shape, PyShape>(m, "Shape", R"""(
+  // cross-language polymorphism
+  // ABC
+  py::class_<Shape, PyShape>(m, "Shape", R"""(
       Abstract base class for shapes. Defines two pure virtual functions, one virtual and one nonvirtual.
     )""")
-      .def(py::init<>()) // required see https://pybind11.readthedocs.io/en/stable/advanced/classes.html
-      .def("area", &Shape::area)  // pure virtual
-      .def("perimeter", &Shape::perimeter)  // pure virtual
-      .def("colour", &Shape::colour)  // virtual
-      .def("dim", &Shape::dim);  // nonvirtual
+      .def(py::init<>())                   // required see https://pybind11.readthedocs.io/en/stable/advanced/classes.html
+      .def("area", &Shape::area)           // pure virtual
+      .def("perimeter", &Shape::perimeter) // pure virtual
+      .def("colour", &Shape::colour)       // virtual
+      .def("dim", &Shape::dim);            // nonvirtual
 
-    // C++ subclasses, only need to register the constructor
-    py::class_<Circle, Shape>(m, "Circle")
+  // C++ subclasses, only need to register the constructor
+  py::class_<Circle, Shape>(m, "Circle")
       .def(py::init<double>(), "radius"_a);
 
-    py::class_<Triangle, Shape, PyTriangle>(m, "Triangle")
+  py::class_<Triangle, Shape, PyTriangle>(m, "Triangle")
       .def(py::init<double, double, double>(), "Scalene triangle specified by the lengths of each side.");
 
-    m.def("call_shape", &call_shape);
+  m.def("call_shape", &call_shape);
 
-    py::enum_<CEnum>(m, "CEnum")
+  py::enum_<CEnum>(m, "CEnum")
       .value("ONE", CEnum::ONE)
       .value("TWO", CEnum::TWO)
       .export_values() // pointlessly replicates scoping issues with C enums
-    ;
-    // not scoped and comparison with int is valid - python replicates this
-    static_assert(ONE == 1);
+      ;
+  // not scoped and comparison with int is valid - python replicates this
+  static_assert(ONE == 1);
 
-    py::enum_<CppEnum>(m, "CppEnum")
+  py::enum_<CppEnum>(m, "CppEnum")
       .value("THREE", CppEnum::THREE)
-      .value("FOUR", CppEnum::FOUR)
-    ;
-    // scoped and comparison with int is invalid - python replicates this
-    // static_assert(CppEnum::THREE == 3);
+      .value("FOUR", CppEnum::FOUR);
+  // scoped and comparison with int is invalid - python replicates this
+  // static_assert(CppEnum::THREE == 3);
 
-    // auto-vectorised function. As the vectorised version is much slower when called with scalar arguments an overload is provided for this case
-    m.def("daxpy", py::overload_cast<double, double, double>(daxpy), "Perform a scalar double precision a-x-plus-y operation", "a"_a, "x"_a, "y"_a)
-     .def("daxpy", py::vectorize(daxpy), "Perform a vectorised double precision a-x-plus-y operation", "a"_a, "x"_a, "y"_a);
+  // auto-vectorised function. As the vectorised version is much slower when called with scalar arguments an overload is provided for this case
+  m.def("daxpy", py::overload_cast<double, double, double>(daxpy), "Perform a scalar double precision a-x-plus-y operation", "a"_a, "x"_a, "y"_a)
+      .def("daxpy", py::vectorize(daxpy), "Perform a vectorised double precision a-x-plus-y operation", "a"_a, "x"_a, "y"_a);
 
-    m.def_submodule("test", "submodule for tests that need to be run in C++")
-      .def("add_constant", [](py::str key, py::object value) { Constants::instance().set(key, value); });
-
-    // problem: nothing to stop this being reassigned
-    // m.attr("const") = std::unique_ptr<Constants, py::nodelete>(&Constants::instance());
+  m.def_submodule("test", "submodule for tests that need to be run in C++")
+      .def("add_constant", [](py::str key, py::object value)
+           { Constants::instance().set(key, value); });
 }
