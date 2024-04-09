@@ -1,5 +1,4 @@
 import pytest
-from typing import Any
 
 from pybind11_examples import Collatz
 

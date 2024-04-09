@@ -61,7 +61,7 @@ def compare_vectorised_performance() -> None:
     # vectorised python (numpy)
     @average_exectime(n=3)
     def v_numpy() -> None:
-        z = a * x + y
+        _z = a * x + y
 
     elapsed_ms, _ = v_numpy()
     print(f"vectorised numpy: {elapsed_ms:.2f}ms")
@@ -69,7 +69,7 @@ def compare_vectorised_performance() -> None:
     # vectorised pybind11
     @average_exectime(n=3)
     def v_pybind() -> None:
-        z = daxpy(a, x, y)
+        _z = daxpy(a, x, y)
 
     elapsed_ms, _ = v_pybind()
     print(f"vectorised pybind11: {elapsed_ms:.2f}ms")

@@ -4,7 +4,6 @@ from pybind11_examples import CONST, test
 
 
 def test_constants() -> None:
-
     e = 2.71828
     CONST.add(pi=3.14159, e=e)
 
@@ -57,7 +56,7 @@ def test_constants() -> None:
     assert "cpp_version" not in CONST
     test.add_constant("cpp_version", 20)
     assert CONST.cpp_version == 20
-    # ...and not modify it 
+    # ...and not modify it
     with pytest.raises(ValueError):
         test.add_constant("cpp_version", 11)
 

@@ -2,7 +2,6 @@ from pybind11_examples import Registry
 
 
 def test_registry() -> None:
-
     class PyBase:
         """Some unrelated base class"""
 
