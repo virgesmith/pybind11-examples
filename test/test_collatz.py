@@ -71,6 +71,4 @@ def test_control():
     ]:
         with pytest.raises(exception_type) as e:
             c.throw(exception_type, "testing 123")
-        assert "testing 123" in str(
-            e.value
-        )  # because KeyError puts quotes around the message
+        assert "testing 123" in str(e.value)  # because KeyError puts quotes around the message

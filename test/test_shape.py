@@ -1,6 +1,8 @@
 from math import sqrt
+
 import pytest
-from pybind11_examples import Shape, Circle, Triangle, call_shape
+
+from pybind11_examples import Circle, Shape, Triangle, call_shape
 
 
 def test_abstract_base() -> None:

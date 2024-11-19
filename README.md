@@ -8,10 +8,10 @@ A python extension module written in C++ with pybind11 bindings, containing impl
 - [X] a context manager
 - [X] some prime number stuff, for performance comparison aginst equivalent python and rust implementations.
 - [X] polymorphism across C++ and python (subclassing C++ classes in python, calling python overrides through a C++ interface)
-- [X] dynamic immutable values wrapped in a `Constants` singleton
+- [X] ~~dynamic immutable values wrapped in a `Constants` singleton that can be trivially reassigned, so it's pointless.~~
 - [X] C and C++ enumerations
 - [X] vectorised functions with a performance comparison against python and vectorised numpy
-- [X] type annotations for C++ implementations 
+- [X] type annotations for C++ implementations
 
 Most of the code originated in [this](http://github.com/virgesmith/poetry-pybind11-integration) project which was originally intended to demonstate how to make pybind11 work with poetry. The project evolved and became more about:
 - how to implement certain python constructs in C++

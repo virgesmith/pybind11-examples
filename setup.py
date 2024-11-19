@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import os
 import glob
-from setuptools import setup
+import os
+
 import numpy
-from pybind11.setup_helpers import Pybind11Extension, ParallelCompile
+from pybind11.setup_helpers import ParallelCompile, Pybind11Extension
+from setuptools import setup
 
 # see https://github.com/pybind/python_example
 
@@ -27,8 +28,7 @@ ext_modules = [
         "_pybind11_examples",
         sources=list_files(["src"], ["cpp"]),
         include_dirs=[numpy.get_include()],
-        depends=["setup.py", "pybind11_examples/__init__.py"]
-        + list_files(["src"], ["h"]),
+        depends=["setup.py", "pybind11_examples/__init__.py"] + list_files(["src"], ["h"]),
         # cxxflags=["-fsanitize=address", "-fsanitize=undefined"],
         cxx_std=20,
     ),

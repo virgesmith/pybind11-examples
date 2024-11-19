@@ -1,6 +1,8 @@
 from time import sleep
+
 import pytest
-from pybind11_examples import exectime, average_exectime
+
+from pybind11_examples import average_exectime, exectime
 
 
 @exectime
@@ -25,7 +27,7 @@ def decorated_kwargs(z: float, *, flag: bool = False) -> int:
 
 @exectime
 def throws() -> None:
-    raise RuntimeError()
+    raise RuntimeError
 
 
 def test_simple_cpp_decorator() -> None:
@@ -52,7 +54,7 @@ def pdecorated_kwargs(z: float, *, flag: bool = False) -> int:
 
 @average_exectime(n=1)
 def pthrows() -> None:
-    raise RuntimeError()
+    raise RuntimeError
 
 
 def test_parameterised_cpp_decorator() -> None:

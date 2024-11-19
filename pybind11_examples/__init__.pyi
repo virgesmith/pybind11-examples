@@ -9,16 +9,16 @@ Pybind11 example plugin
 """
 
 from __future__ import annotations
+
+import typing
+
 import numpy
 import numpy.typing as npt
-import typing
 
 __all__ = [
     "CEnum",
-    "CONST",
     "Circle",
     "Collatz",
-    "Constants",
     "CppEnum",
     "FibGenerator",
     "ManagedThing",
@@ -51,19 +51,15 @@ class CEnum:
 
     ONE: typing.ClassVar[CEnum]  # value = <CEnum.ONE: 1>
     TWO: typing.ClassVar[CEnum]  # value = <CEnum.TWO: 2>
-    __members__: typing.ClassVar[
-        dict[str, CEnum]
-    ]  # value = {'ONE': <CEnum.ONE: 1>, 'TWO': <CEnum.TWO: 2>}
-    def __eq__(self, other: typing.Any) -> bool: ...
+    __members__: typing.ClassVar[dict[str, CEnum]]  # value = {'ONE': <CEnum.ONE: 1>, 'TWO': <CEnum.TWO: 2>}
+    def __eq__(self, other: object) -> bool: ...
     def __getstate__(self) -> int: ...
     def __hash__(self) -> int: ...
     def __index__(self) -> int: ...
     def __init__(self, value: int) -> None: ...
     def __int__(self) -> int: ...
-    def __ne__(self, other: typing.Any) -> bool: ...
-    def __repr__(self) -> str: ...
+    def __ne__(self, other: object) -> bool: ...
     def __setstate__(self, state: int) -> None: ...
-    def __str__(self) -> str: ...
     @property
     def name(self) -> str: ...
     @property
@@ -124,24 +120,6 @@ class Collatz:
         generator throw default
         """
 
-class Constants:
-    """
-
-    Singleton wrapper for immutable values
-
-    """
-    @staticmethod
-    def add(**kwargs) -> None:
-        """
-        add constants (throws if already defined)
-        """
-    def __delattr__(self, arg0: str) -> None: ...
-    def __getattr__(self, arg0: str) -> typing.Any: ...
-    def __iter__(self) -> typing.Iterator[str]: ...
-    def __repr__(self) -> str: ...
-    def __setattr__(self, arg0: str, arg1: typing.Any) -> None: ...
-    def items(self) -> typing.Iterator[tuple[str, typing.Any]]: ...
-
 class CppEnum:
     """
     Members:
@@ -153,19 +131,15 @@ class CppEnum:
 
     FOUR: typing.ClassVar[CppEnum]  # value = <CppEnum.FOUR: 4>
     THREE: typing.ClassVar[CppEnum]  # value = <CppEnum.THREE: 3>
-    __members__: typing.ClassVar[
-        dict[str, CppEnum]
-    ]  # value = {'THREE': <CppEnum.THREE: 3>, 'FOUR': <CppEnum.FOUR: 4>}
-    def __eq__(self, other: typing.Any) -> bool: ...
+    __members__: typing.ClassVar[dict[str, CppEnum]]  # value = {'THREE': <CppEnum.THREE: 3>, 'FOUR': <CppEnum.FOUR: 4>}
+    def __eq__(self, other: object) -> bool: ...
     def __getstate__(self) -> int: ...
     def __hash__(self) -> int: ...
     def __index__(self) -> int: ...
     def __init__(self, value: int) -> None: ...
     def __int__(self) -> int: ...
-    def __ne__(self, other: typing.Any) -> bool: ...
-    def __repr__(self) -> str: ...
+    def __ne__(self, other: object) -> bool: ...
     def __setstate__(self, state: int) -> None: ...
-    def __str__(self) -> str: ...
     @property
     def name(self) -> str: ...
     @property
@@ -198,9 +172,7 @@ class ManagedThing:
         """
         Enter context manager.
         """
-    def __exit__(
-        self, type: typing.Any, value: typing.Any = "", traceback: typing.Any = None
-    ) -> None:
+    def __exit__(self, type_: typing.Any, value: typing.Any = "", traceback: typing.Any = None) -> None:
         """
         Exit context manager.
         """
@@ -284,14 +256,15 @@ class Triangle(Shape):
 
 def average_exectime(
     *, n: int
-) -> typing.Callable[[typing.Callable[[typing.Any], typing.Any]], typing.Callable[[typing.Any], tuple[float, typing.Any]]]:
+) -> typing.Callable[
+    [typing.Callable[[typing.Any], typing.Any]], typing.Callable[[typing.Any], tuple[float, typing.Any]]
+]:
     """
     A parameterised decorator that averages execution time for a given number of repeats, implemented in C++.
     It returns a tuple containing the average exec time (in ms) and the function result
     """
 
 def call_shape(arg0: Shape) -> str: ...
-
 @typing.overload
 def daxpy(a: float, x: float, y: float) -> float:
     """
@@ -300,7 +273,7 @@ def daxpy(a: float, x: float, y: float) -> float:
 
 @typing.overload
 def daxpy(
-    a: float | npt.NDArray[numpy.float64], #  numpy.ndarray[numpy.float64],
+    a: float | npt.NDArray[numpy.float64],  #  numpy.ndarray[numpy.float64],
     x: float | npt.NDArray[numpy.float64],
     y: float | npt.NDArray[numpy.float64],
 ) -> typing.Any:
@@ -322,6 +295,5 @@ def is_prime(n: int) -> bool: ...
 def nth_prime(n: int) -> int: ...
 def prime_factors(n: int) -> list[int]: ...
 
-CONST: Constants  # value = <Constants {}>
 ONE: CEnum  # value = <CEnum.ONE: 1>
 TWO: CEnum  # value = <CEnum.TWO: 2>

@@ -1,4 +1,5 @@
 from enum import Enum
+
 import pybind11_examples as outerscope
 from pybind11_examples import CEnum, CppEnum
 
@@ -13,10 +14,10 @@ def test_enum():
     assert CEnum.ONE == CEnum.ONE.value == 1
     assert CEnum.TWO == CEnum.TWO.value == 2
     # C++ scoped enums don't (like python ones)
-    assert not CppEnum.THREE == 3
-    assert not CppEnum.FOUR == 4
-    assert not PyEnum.SEVEN == 7
-    assert not PyEnum.EIGHT == 7
+    assert CppEnum.THREE != 3
+    assert CppEnum.FOUR != 4
+    assert PyEnum.SEVEN != 7
+    assert PyEnum.EIGHT != 7
 
     assert CppEnum.THREE.value == 3
     assert CppEnum.FOUR.value == 4

@@ -1,15 +1,16 @@
+import random
 from functools import reduce
 from operator import mul
-import random
+
 import pytest
 
 from pybind11_examples import (
+    PrimeGenerator,
+    PrimeRange,
+    PrimeSieve,
     is_prime,
     nth_prime,
     prime_factors,
-    PrimeSieve,
-    PrimeRange,
-    PrimeGenerator,
 )
 
 

@@ -1,24 +1,22 @@
-#include "registry.h"
-#include "decorators.h"
-#include "fibonacci.h"
 #include "collatz.h"
+#include "decorators.h"
+#include "enums.h"
+#include "fibonacci.h"
 #include "managed_resource.h"
 #include "primes.h"
-#include "constants.h"
+#include "registry.h"
 #include "shape.h"
-#include "enums.h"
 #include "vectorised.h"
 
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <pybind11/numpy.h>
 
 namespace py = pybind11;
 
 using namespace py::literals;
 
-PYBIND11_MODULE(_pybind11_examples, m)
-{
+PYBIND11_MODULE(_pybind11_examples, m) {
   m.doc() = R"""(
     Pybind11 example plugin
     -----------------------
@@ -56,28 +54,20 @@ PYBIND11_MODULE(_pybind11_examples, m)
     via the [] operator, an iterator, or by the dict-like items() method.
   )""")
       .def(py::init<>())
-      // workaround the lack of @classmethod in pybind11 by wrapping in a static that returns a lambda bound to the object
-      .def_property_readonly_static("__init_subclass__", [](py::object &cls)
-                                    { return py::cpp_function([cls](const py::kwargs &kwargs)
-                                                              { return Registry::init_subclass(cls, kwargs); }); })
-      .def("__getitem__",
-           [](py::object, py::type key) -> py::dict
-           {
-             return (*Registry::registry)[key];
-           })
+      // workaround the lack of @classmethod in pybind11 by wrapping in a static that returns a lambda bound to the
+      // object
+      .def_property_readonly_static(
+          "__init_subclass__",
+          [](py::object& cls) {
+            return py::cpp_function([cls](const py::kwargs& kwargs) { return Registry::init_subclass(cls, kwargs); });
+          })
+      .def("__getitem__", [](py::object, py::type key) -> py::dict { return (*Registry::registry)[key]; })
       .def(
           "__iter__",
-          [](py::object)
-          {
-            return py::make_key_iterator(Registry::registry->begin(), Registry::registry->end());
-          },
+          [](py::object) { return py::make_key_iterator(Registry::registry->begin(), Registry::registry->end()); },
           py::keep_alive<0, 1>())
       .def(
-          "items",
-          [](py::object)
-          {
-            return py::make_iterator(Registry::registry->begin(), Registry::registry->end());
-          },
+          "items", [](py::object) { return py::make_iterator(Registry::registry->begin(), Registry::registry->end()); },
           py::keep_alive<0, 1>());
 
   // decorator
@@ -85,28 +75,28 @@ PYBIND11_MODULE(_pybind11_examples, m)
       A simple decorator that times execution, implemented in C++
       )""")
       .def("average_exectime", &average_exectime, py::kw_only(), "n"_a, R"""(
-      A parameterised decorator that averages execution time for a given number of repeats, implemented in C++. 
+      A parameterised decorator that averages execution time for a given number of repeats, implemented in C++.
       It returns a tuple containing the average exec time (in ms) and the function result
       )""");
 
   py::class_<ManagedResource<Thing, int, int>>(m, "ManagedThing")
-      .def(py::init([](int a, int b)
-                    { return std::move(ManagedResource<Thing, int, int>(&Thing::do_the_thing, a, b)); }),
+      .def(py::init(
+               [](int a, int b) { return ManagedResource<Thing, int, int>(&Thing::do_the_thing, a, b); }),
            "param1"_a, "param2"_a,
            R"""(
         Initialise the wrapper, with the parameters and method to be called on the wrapped object.
         The wrapped object is NOT constructed until __enter__ is called.
         )""")
       .def(
-          "__call__", [](const ManagedResource<Thing, int, int> &wrapper)
-          { return wrapper(); },
+          "__call__", [](const ManagedResource<Thing, int, int>& wrapper) { return wrapper(); },
           R"""(
         Here you require at least one lambda to access the wrapped object and perform some operation on/with it.
         The object itself cannot be exposed to python as this will break RAII (you could bind the result of this call to a python variable
         and attempt access outside the context manager, invoking undefined behaviour - the memory will have been released).
       )""")
       .def("__enter__", &ManagedResource<Thing, int, int>::enter, "Enter context manager.")
-      .def("__exit__", &ManagedResource<Thing, int, int>::exit, "type"_a, "value"_a = py::str(), "traceback"_a = py::none(), "Exit context manager.");
+      .def("__exit__", &ManagedResource<Thing, int, int>::exit, "type"_a, "value"_a = py::str(),
+           "traceback"_a = py::none(), "Exit context manager.");
 
   py::class_<PrimeSieve>(m, "PrimeSieve", R"""(
       C++ implementation of a prime number sieve.
@@ -133,67 +123,19 @@ PYBIND11_MODULE(_pybind11_examples, m)
       .def("nth_prime", &nth_prime_py, "n"_a)
       .def("prime_factors", &prime_factors, "n"_a);
 
-  // py::dynamic_attr() adds __dict__ but cant override: AttributeError: attribute '__dict__' of 'type' objects is not writable
-  py::class_<Constants, std::unique_ptr<Constants, py::nodelete>>(m, "Constants", R"""(
-      Singleton wrapper for immutable values
-    )""")
-      .def_static(
-          "add",
-          [](py::kwargs kwargs)
-          {
-            Constants::instance(kwargs);
-          },
-          "add constants (throws if already defined)")
-      .def("__repr__",
-           [](py::object)
-           {
-             return Constants::instance().repr();
-           })
-      .def("__getattr__",
-           [](py::object, const std::string &name)
-           {
-             return Constants::instance().get(name);
-           })
-      .def("__setattr__",
-           [](py::object, const std::string &name, Constants::mapped_type value)
-           {
-             return Constants::instance().set(name, value);
-           })
-      .def("__delattr__",
-           [](py::object, const std::string &name)
-           {
-             throw py::attribute_error("can't delete immutable: %%"s % name);
-           })
-      .def(
-          "__iter__",
-          [](py::object)
-          {
-            return py::make_iterator(Constants::instance().keys_begin(), Constants::instance().keys_end());
-          },
-          py::keep_alive<0, 1>())
-      .def(
-          "items",
-          [](py::object)
-          {
-            return py::make_iterator(Constants::instance().store_begin(), Constants::instance().store_end());
-          },
-          py::keep_alive<0, 1>());
-  m.attr("CONST") = std::unique_ptr<Constants, py::nodelete>(&Constants::instance());
-
   // cross-language polymorphism
   // ABC
   py::class_<Shape, PyShape>(m, "Shape", R"""(
       Abstract base class for shapes. Defines two pure virtual functions, one virtual and one nonvirtual.
     )""")
-      .def(py::init<>())                   // required see https://pybind11.readthedocs.io/en/stable/advanced/classes.html
-      .def("area", &Shape::area)           // pure virtual
+      .def(py::init<>())         // required see https://pybind11.readthedocs.io/en/stable/advanced/classes.html
+      .def("area", &Shape::area) // pure virtual
       .def("perimeter", &Shape::perimeter) // pure virtual
       .def("colour", &Shape::colour)       // virtual
       .def("dim", &Shape::dim);            // nonvirtual
 
   // C++ subclasses, only need to register the constructor
-  py::class_<Circle, Shape>(m, "Circle")
-      .def(py::init<double>(), "radius"_a);
+  py::class_<Circle, Shape>(m, "Circle").def(py::init<double>(), "radius"_a);
 
   py::class_<Triangle, Shape, PyTriangle>(m, "Triangle")
       .def(py::init<double, double, double>(), "Scalene triangle specified by the lengths of each side.");
@@ -208,17 +150,14 @@ PYBIND11_MODULE(_pybind11_examples, m)
   // not scoped and comparison with int is valid - python replicates this
   static_assert(ONE == 1);
 
-  py::enum_<CppEnum>(m, "CppEnum")
-      .value("THREE", CppEnum::THREE)
-      .value("FOUR", CppEnum::FOUR);
+  py::enum_<CppEnum>(m, "CppEnum").value("THREE", CppEnum::THREE).value("FOUR", CppEnum::FOUR);
   // scoped and comparison with int is invalid - python replicates this
   // static_assert(CppEnum::THREE == 3);
 
-  // auto-vectorised function. As the vectorised version is much slower when called with scalar arguments an overload is provided for this case
-  m.def("daxpy", py::overload_cast<double, double, double>(daxpy), "Perform a scalar double precision a-x-plus-y operation", "a"_a, "x"_a, "y"_a)
-      .def("daxpy", py::vectorize(daxpy), "Perform a vectorised double precision a-x-plus-y operation", "a"_a, "x"_a, "y"_a);
-
-  m.def_submodule("test", "submodule for tests that need to be run in C++")
-      .def("add_constant", [](py::str key, py::object value)
-           { Constants::instance().set(key, value); });
+  // auto-vectorised function. As the vectorised version is much slower when called with scalar arguments an overload is
+  // provided for this case
+  m.def("daxpy", py::overload_cast<double, double, double>(daxpy),
+        "Perform a scalar double precision a-x-plus-y operation", "a"_a, "x"_a, "y"_a)
+      .def("daxpy", py::vectorize(daxpy), "Perform a vectorised double precision a-x-plus-y operation", "a"_a, "x"_a,
+           "y"_a);
 }
