@@ -21,9 +21,6 @@ public:
 class PyShape : public Shape
 {
 public:
-  // Inherit the constructors. why, Shape is abstract? 
-  // using Shape::Shape;
-
   /* Trampolines (need one for each virtual function) */
   double area() const override {
     PYBIND11_OVERRIDE_PURE(
@@ -94,5 +91,5 @@ inline std::string call_shape(const Shape &shape)
 {
   py::object obj = py::cast(&shape); // works for C++
   const std::string &name = obj.attr("__class__").attr("__name__").cast<std::string>();
-  return "<%% %%d A=%% L=%% %%>"_s % name % shape.dim() % shape.area() % shape.perimeter() % shape.colour();
+  return "<%% %%d A=%% L=%% %%>"s % name % shape.dim() % shape.area() % shape.perimeter() % shape.colour();
 }

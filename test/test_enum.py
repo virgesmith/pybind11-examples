@@ -10,10 +10,11 @@ class PyEnum(Enum):
 
 
 def test_enum():
-    # C enums implicitly equate to integers
-    assert CEnum.ONE == CEnum.ONE.value == 1
-    assert CEnum.TWO == CEnum.TWO.value == 2
-    # C++ scoped enums don't (like python ones)
+    # enums dont implicitly equate to integers
+    assert CEnum.ONE != 1
+    assert CEnum.TWO.name == "TWO"
+    assert CEnum.TWO.value == 2
+
     assert CppEnum.THREE != 3
     assert CppEnum.FOUR != 4
     assert PyEnum.SEVEN != 7
@@ -25,7 +26,7 @@ def test_enum():
     # class X(int): pass
     # assert issubclass(X, int)
 
-    Pybind11Enum = [CEnum, CppEnum]
+    Pybind11Enum = [CppEnum, CEnum]
 
     # name comparison (note 3.12 syntax)
     # also pybind11 enums don't subclass enum and

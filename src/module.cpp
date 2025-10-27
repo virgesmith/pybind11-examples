@@ -8,6 +8,7 @@
 #include "shape.h"
 #include "vectorised.h"
 
+#include <pybind11/native_enum.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -16,7 +17,7 @@ namespace py = pybind11;
 
 using namespace py::literals;
 
-PYBIND11_MODULE(_pybind11_examples, m) {
+PYBIND11_MODULE(_pybind11_examples, m, py::mod_gil_not_used()) {
   m.doc() = R"""(
     Pybind11 example plugin
     -----------------------
@@ -80,8 +81,7 @@ PYBIND11_MODULE(_pybind11_examples, m) {
       )""");
 
   py::class_<ManagedResource<Thing, int, int>>(m, "ManagedThing")
-      .def(py::init(
-               [](int a, int b) { return ManagedResource<Thing, int, int>(&Thing::do_the_thing, a, b); }),
+      .def(py::init([](int a, int b) { return ManagedResource<Thing, int, int>(&Thing::do_the_thing, a, b); }),
            "param1"_a, "param2"_a,
            R"""(
         Initialise the wrapper, with the parameters and method to be called on the wrapped object.
@@ -142,15 +142,27 @@ PYBIND11_MODULE(_pybind11_examples, m) {
 
   m.def("call_shape", &call_shape);
 
-  py::enum_<CEnum>(m, "CEnum")
-      .value("ONE", CEnum::ONE)
-      .value("TWO", CEnum::TWO)
+  py::native_enum<EnumScope::CEnum>(m, "CEnum", "enum.Enum")
+      .value("ONE", EnumScope::CEnum::ONE)
+      .value("TWO", EnumScope::CEnum::TWO)
       .export_values() // pointlessly replicates scoping issues with C enums
-      ;
-  // not scoped and comparison with int is valid - python replicates this
-  static_assert(ONE == 1);
+      .finalize();
+  // not scoped and comparison with int is valid - python doesn't replicate this
+  static_assert(EnumScope::ONE == 1);
 
-  py::enum_<CppEnum>(m, "CppEnum").value("THREE", CppEnum::THREE).value("FOUR", CppEnum::FOUR);
+  // Strange things happen when you try to expose a globally scoped C enum
+  // py::native_enum<GlobalCEnum>(m, "GlobalCEnum", "enum.Enum")
+  //     .value("ONE", GlobalCEnum::ONE)
+  //     .value("TWO", GlobalCEnum::TWO)
+  //     .export_values() // pointlessly replicates scoping issues with C enums
+  //     .finalize();
+
+  py::native_enum<CppEnum>(m, "CppEnum", "enum.Enum")
+      .value("ONE", CppEnum::ONE)
+      .value("TWO", CppEnum::TWO)
+      .value("THREE", CppEnum::THREE)
+      .value("FOUR", CppEnum::FOUR)
+      .finalize();
   // scoped and comparison with int is invalid - python replicates this
   // static_assert(CppEnum::THREE == 3);
 

@@ -21,20 +21,27 @@ Most of the code originated in [this](http://github.com/virgesmith/poetry-pybind
 
 Build and install the package:
 
+
 ```sh
-pip install -e .[dev]
+uv sync --dev
+```
+
+Create a package
+
+```sh
+uv pip install -e .[dev]
 ```
 
 Test:
 
 ```sh
-pytest
+uv run pytest
 ```
 
 Performance (vectorisation comparison):
 
 ```sh
-python test/test_vectorised.py
+uv run python test/test_vectorised.py
 ```
 
 Use, e.g.:

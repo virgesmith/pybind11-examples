@@ -2,10 +2,16 @@
 
 #include <cstdint>
 
-enum CEnum { ONE = 1, TWO = 2 };
+struct EnumScope {
+  enum CEnum { ONE = 1, TWO = 2 };
+};
 
-enum class CppEnum: int8_t { 
+enum GlobalCEnum { ONE = 1, TWO = 2 };
+
+enum class CppEnum: int8_t {
+  ONE = 1,
+  TWO = 2,
   THREE = 3,
-  FOUR = 4 
-}; 
+  FOUR = 4
+};
 
