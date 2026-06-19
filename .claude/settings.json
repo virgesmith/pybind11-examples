@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip show *)",
+      "Bash(uv --version)",
+      "Bash(uv run *)",
+      "Bash(uv lock *)",
+      "Bash(uv build *)",
+      "Read(//tmp/stubgen_out/**)"
+    ]
+  }
+}

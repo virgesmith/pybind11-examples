@@ -26,12 +26,10 @@ def test_enum():
     # class X(int): pass
     # assert issubclass(X, int)
 
-    Pybind11Enum = [CppEnum, CEnum]
-
     # name comparison (note 3.12 syntax)
     # also pybind11 enums don't subclass enum and
     # pybind11_builtins.pybind11_object is seemingly inaccessible
-    def n[T: Enum | Pybind11Enum](e: T, name: str) -> bool:
+    def n[T: Enum | CEnum | CppEnum](e: T, name: str) -> bool:
         return e.name == name
 
     assert n(CEnum.ONE, "ONE")

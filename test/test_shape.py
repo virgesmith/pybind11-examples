@@ -64,7 +64,7 @@ def test_py_subclasses() -> None:
             return "Green"
 
         # override the nonvirtual method (this will only affect direct calls from python)
-        def dim(self) -> str:
+        def dim(self) -> int:
             raise TypeError("nonvirtual impl not visible via Shape ref")
 
     class Square(Rectangle):
